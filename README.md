@@ -4,6 +4,10 @@ Welcome to the Student Election, a web-based application designed to facilitate 
 
 To get this full-stack Flower Pot project running locally, follow the steps below for both the back and front end.
 
+### Prerequisite
+
+To make this project work as intended make sure you have MongoDB installed and running in your system.
+
 
 ### 🔧 Backend Setup
 
