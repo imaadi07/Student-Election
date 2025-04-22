@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Navbar({ token }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,26 +28,26 @@ function Navbar({ token }) {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <img
-              src="./images/jiet-logo.png" 
+              src="./images/jiet-logo.png"
               alt="JIET Logo"
               className="h-10 w-10 mr-2"
             />
             <h1 className="text-xl font-bold">JIET Student Council Election</h1>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="hover:bg-indigo-700 px-3 py-2 rounded-md transition"
             >
               Home
-            </a>
+            </Link>
             {token && (
-              <a
-                href={isAdmin ? "/admin" : "/dashboard"}
+              <Link
+                to={isAdmin ? "/admin-dashboard" : "/dashboard"}
                 className="hover:bg-indigo-700 px-3 py-2 rounded-md transition"
               >
                 {isAdmin ? "Admin Dashboard" : "Student Dashboard"}
-              </a>
+              </Link>
             )}
             {token ? (
               <button
@@ -57,12 +57,12 @@ function Navbar({ token }) {
                 Logout
               </button>
             ) : (
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="hover:bg-indigo-700 px-3 py-2 rounded-md transition"
               >
                 Login
-              </a>
+              </Link>
             )}
           </div>
           <div className="md:hidden flex items-center">
@@ -92,19 +92,19 @@ function Navbar({ token }) {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="block hover:bg-indigo-700 px-3 py-2 rounded-md"
             >
               Home
-            </a>
+            </Link>
             {token && (
-              <a
-                href={isAdmin ? "/admin" : "/dashboard"}
+              <Link
+                to={isAdmin ? "/admin-dashboard" : "/dashboard"}
                 className="block hover:bg-indigo-700 px-3 py-2 rounded-md"
               >
                 {isAdmin ? "Admin Dashboard" : "Student Dashboard"}
-              </a>
+              </Link>
             )}
             {token ? (
               <button
@@ -114,12 +114,12 @@ function Navbar({ token }) {
                 Logout
               </button>
             ) : (
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="block hover:bg-indigo-700 px-3 py-2 rounded-md"
               >
                 Login
-              </a>
+              </Link>
             )}
           </div>
         </div>

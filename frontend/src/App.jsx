@@ -1,27 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Login from "./components/Login.jsx";
-import Signup from "./components/Signup.jsx";
-import Dashboard from "./components/Dashboard.jsx";
-import AdminDashboard from "./components/AdminDashboard.jsx";
-import Navbar from "./components/Navbar.jsx";
-import Greeting from "./components/Greeting.jsx";
+import Navbar from "./components/Navbar";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
+import Dashboard from "./components/Dashboard";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      {token && <Navbar token={token} />}
+    <>
+      <Navbar token={localStorage.getItem("token")} />
       <Routes>
-        <Route path="/greeting" element={<Greeting />} />
-        <Route path="/login" element={<Login setToken={setToken} />} />
-        <Route path="/signup" element={<Signup setToken={setToken} />} />
-        <Route path="/dashboard" element={<Dashboard token={token} />} />
-        <Route path="/admin" element={<AdminDashboard token={token} />} />
-        <Route path="/" element={<Greeting />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
-    </div>
+    </>
   );
 }
 

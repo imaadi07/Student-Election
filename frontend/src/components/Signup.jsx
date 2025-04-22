@@ -1,154 +1,75 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function Signup({ setToken }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("student");
-  const [isLoading, setIsLoading] = useState(false);
+const Signup = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError('');
+
+    // Client-side email validation
+    const emailRegex = /^[a-zA-Z0-9_]+\.jics[0-9]+@jietjodhpur\.ac\.in$/;
+    if (!emailRegex.test(email)) {
+      setError('Please use a valid JIET college email in the format name.jicsXXX@jietjodhpur.ac.in (e.g., aditya.jics054@jietjodhpur.ac.in).');
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
+      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+        email,
+        password,
+      }, {
+        headers: { 'x-auth-token': '' } // Match backend expectation
       });
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
-        const payload = JSON.parse(atob(data.token.split(".")[1]));
-        toast.success("Signup successful!");
-        if (payload.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        toast.error(data.msg || "Signup failed");
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+      localStorage.setItem('token', response.data.token);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Signup failed.');
     }
   };
 
   return (
-    <div
-      className="min-h-screen bg-gray-100 bg-cover bg-center flex items-center justify-center"
-      style={{
-        backgroundImage: `url('/images/background.jpeg')`, // Replace with actual image path
-        backgroundAttachment: "fixed",
-      }}
-    >
-      <div className="min-h-screen backdrop-blur-sm bg-white/30 w-full flex items-center justify-center">
-        <div className="max-w-md w-full mx-4 p-8 bg-white/80 rounded-2xl shadow-xl backdrop-blur-md">
-          <h2 className="text-3xl font-extrabold text-indigo-700 mb-6 text-center">
-            JIET Student Council Election - Sign Up
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Role
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled={isLoading}
-              >
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className={`w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition disabled:bg-indigo-400 ${
-                isLoading ? "cursor-not-allowed" : ""
-              }`}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <svg
-                  className="animate-spin h-5 w-5 mx-auto text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-              ) : (
-                "Sign Up"
-              )}
-            </button>
-          </form>
-          <p className="mt-4 text-center text-gray-600">
-            Already have an account?{" "}
-            <a href="/login" className="text-indigo-600 hover:underline">
-              Login
-            </a>
-          </p>
-        </div>
-        <ToastContainer position="top-right" autoClose={3000} />
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: "url('/images/background.png')" }}>
+      <div className="bg-white bg-opacity-80 backdrop-blur-md p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">Signup</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 border rounded"
+              placeholder="e.g., aditya.jics054@jietjodhpur.ac.in"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+            Signup
+          </button>
+        </form>
+        <p className="text-center mt-4">
+          Already have an account? <a href="/login" className="text-blue-500">Login</a>
+        </p>
       </div>
     </div>
   );
-}
+};
 
 export default Signup;

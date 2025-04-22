@@ -1,75 +1,79 @@
 import React, { useState, useEffect } from "react";
-import VotingForm from "./VotingForm.jsx";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 
-function Dashboard({ token }) {
+const Dashboard = () => {
   const [nominees, setNominees] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
+    if (!localStorage.getItem("token")) {
       navigate("/login");
-      return;
     }
+  }, [navigate]);
 
-    const checkRole = () => {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload.role === "admin") {
-          navigate("/admin");
-        }
-      } catch (error) {
-        console.error("Token parsing error:", error);
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
-    };
-    checkRole();
-
+  useEffect(() => {
     const fetchNominees = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/nominees", {
-          headers: { "x-auth-token": token },
+        const response = await axios.get("http://localhost:5000/api/nominees", {
+          headers: { "x-auth-token": localStorage.getItem("token") },
         });
-        if (!res.ok) throw new Error("Failed to fetch nominees");
-        const data = await res.json();
-        setNominees(data);
-      } catch (error) {
-        console.error("Fetch nominees error:", error);
+        setNominees(response.data);
+      } catch (err) {
+        setError("Failed to load nominees.");
       }
     };
     fetchNominees();
-  }, [token, navigate]);
+  }, []);
+
+  const handleVote = async (nomineeId, position) => {
+    try {
+      await axios.post(
+        "http://localhost:5000/api/votes",
+        { nomineeId, position },
+        { headers: { "x-auth-token": localStorage.getItem("token") } }
+      );
+      alert("Vote cast successfully!");
+    } catch (err) {
+      setError(err.response?.data?.msg || "Voting failed.");
+    }
+  };
 
   return (
     <div
-      className="min-h-screen bg-gray-100 bg-cover bg-center"
-      style={{
-        backgroundImage: `url('/background.jpg')`, // Update with valid path
-        backgroundAttachment: "fixed",
-      }}
+      className="min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/images/background.jpeg')" }}
     >
-      <div className="min-h-screen backdrop-blur-sm bg-white/30">
-        <div className="max-w-7xl mx-auto mt-10 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white/80 rounded-2xl shadow-xl p-8 backdrop-blur-md">
-            <h2 className="text-4xl font-extrabold text-indigo-700 mb-8">
-              JIET Student Dashboard
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-                  Cast Your Vote
-                </h3>
-                <VotingForm token={token} nominees={nominees} />
+      <div className="container mx-auto p-4">
+        <h2 className="text-2xl font-bold mb-4">Student Dashboard</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {nominees.length === 0 ? (
+          <p>No nominees available for voting.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {nominees.map((nominee) => (
+              <div
+                key={nominee._id}
+                className="bg-white bg-opacity-80 p-4 rounded"
+              >
+                <h3 className="text-lg font-semibold">{nominee.name}</h3>
+                <p>
+                  <strong>Position:</strong> {nominee.position}
+                </p>
+                <button
+                  onClick={() => handleVote(nominee._id, nominee.position)}
+                  className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-2"
+                >
+                  Vote
+                </button>
               </div>
-            </div>
+            ))}
           </div>
-        </div>
-        <ToastContainer position="top-right" autoClose={3000} />
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default Dashboard;
